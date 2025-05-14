@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { FileScan, Lightbulb, ClipboardList, CheckCircle, AlertTriangle } from 'lucide-react';
+import { FileScan, Lightbulb, ClipboardList, CheckCircle, AlertTriangle, MessageSquare } from 'lucide-react';
+import InteractiveInterview from './interactive-interview'; // Import the new component
 
 interface ResultsDisplayProps {
   results: FullAnalysisResult;
@@ -15,12 +16,6 @@ interface ResultsDisplayProps {
 const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
   const { resumeFit, resumeImprovements, interviewScript } = results;
 
-  const getFitScoreColor = (score: number) => {
-    if (score >= 75) return 'bg-green-500';
-    if (score >= 50) return 'bg-yellow-500';
-    return 'bg-red-500';
-  };
-  
   // Helper to format multiline strings into paragraphs
   const formatMultilineText = (text: string | undefined) => {
     if (!text) return <p>No information available.</p>;
@@ -33,7 +28,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
     <div className="space-y-8 mt-10">
       <h2 className="text-3xl font-bold text-center text-primary">Your CareerFit AI Analysis</h2>
       
-      <Accordion type="multiple" defaultValue={['resume-fit', 'improvements', 'interview-script']} className="w-full space-y-6">
+      <Accordion type="multiple" defaultValue={['resume-fit', 'improvements', 'interview-script-static', 'interactive-interview']} className="w-full space-y-6">
         
         {/* Resume Fit Analysis Card */}
         <AccordionItem value="resume-fit" className="border-none">
@@ -116,35 +111,68 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
           </Card>
         </AccordionItem>
 
-        {/* Interview Script Generator Card */}
-        <AccordionItem value="interview-script" className="border-none">
+        {/* Static Interview Script Card (List of Questions) */}
+        <AccordionItem value="interview-script-static" className="border-none">
           <Card className="shadow-lg overflow-hidden">
             <AccordionTrigger className="w-full hover:no-underline">
                <CardHeader className="flex flex-row items-center justify-between w-full p-6">
                  <div className="flex items-center">
                     <ClipboardList className="h-8 w-8 mr-3 text-primary" />
                     <div>
-                      <CardTitle className="text-2xl font-semibold">Mock Interview Script</CardTitle>
-                      <CardDescription>Prepare with this AI-generated interview script.</CardDescription>
+                      <CardTitle className="text-2xl font-semibold">Generated Interview Questions</CardTitle>
+                      <CardDescription>Review the AI-generated questions for your mock interview.</CardDescription>
                     </div>
                   </div>
                </CardHeader>
             </AccordionTrigger>
             <AccordionContent>
               <CardContent className="p-6">
-                {interviewScript.interviewScript ? (
+                {interviewScript.questions && interviewScript.questions.length > 0 ? (
                   <div className="p-4 bg-secondary/30 rounded-md shadow-inner max-h-96 overflow-y-auto">
-                    <pre className="whitespace-pre-wrap break-words text-sm font-mono text-foreground leading-relaxed">
-                      {interviewScript.interviewScript}
-                    </pre>
+                    <ul className="space-y-3 list-decimal list-inside">
+                      {interviewScript.questions.map((question, index) => (
+                        <li key={index} className="text-sm text-foreground leading-relaxed">
+                          {question}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground">Interview script could not be generated. Please ensure all inputs are correctly provided.</p>
+                  <p className="text-sm text-muted-foreground">Interview questions could not be generated. Please ensure all inputs are correctly provided.</p>
                 )}
               </CardContent>
             </AccordionContent>
           </Card>
         </AccordionItem>
+
+        {/* Interactive Mock Interview Card */}
+        <AccordionItem value="interactive-interview" className="border-none">
+          <Card className="shadow-lg overflow-hidden">
+             <AccordionTrigger className="w-full hover:no-underline">
+               <CardHeader className="flex flex-row items-center justify-between w-full p-6">
+                  <div className="flex items-center">
+                    <MessageSquare className="h-8 w-8 mr-3 text-green-600" />
+                    <div>
+                      <CardTitle className="text-2xl font-semibold">Interactive Mock Interview</CardTitle>
+                      <CardDescription>Practice your responses with AI voice and get feedback.</CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+             </AccordionTrigger>
+             <AccordionContent>
+                <CardContent className="p-0 sm:p-2 md:p-4"> {/* Reduce padding on smaller screens for InteractiveInterview component */}
+                    {interviewScript.questions && interviewScript.questions.length > 0 ? (
+                        <InteractiveInterview questions={interviewScript.questions} />
+                    ) : (
+                        <p className="text-sm text-muted-foreground p-6">
+                            Interactive interview cannot start as no questions were generated.
+                        </p>
+                    )}
+                </CardContent>
+             </AccordionContent>
+          </Card>
+        </AccordionItem>
+
       </Accordion>
     </div>
   );
