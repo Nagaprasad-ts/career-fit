@@ -4,8 +4,6 @@ import {
   analyzeResumeFit, 
   suggestResumeImprovements, 
   generateInterviewScript,
-  synthesizeSpeech,
-  transcribeSpeech,
   analyzeUserResponse
 } from '@/ai/flows';
 import type { 
@@ -14,9 +12,7 @@ import type {
   CareerFitAiError,
   SynthesizeSpeechInput,
   SynthesizeSpeechOutput,
-  TranscribeSpeechInput,
   TranscribeSpeechOutput,
-  AnalyzeUserResponseInput,
   AnalyzeUserResponseOutput
 } from '@/lib/types/careerfit-types';
 
