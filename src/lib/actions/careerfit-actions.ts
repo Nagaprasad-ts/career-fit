@@ -1,10 +1,13 @@
+
 'use server';
 
 import { 
   analyzeResumeFit, 
   suggestResumeImprovements, 
   generateInterviewScript,
-  analyzeUserResponse
+  analyzeUserResponse,
+  synthesizeSpeech,
+  transcribeSpeech 
 } from '@/ai/flows';
 import type { 
   CareerFitFormData, 
@@ -12,7 +15,9 @@ import type {
   CareerFitAiError,
   SynthesizeSpeechInput,
   SynthesizeSpeechOutput,
+  TranscribeSpeechInput,
   TranscribeSpeechOutput,
+  AnalyzeUserResponseInput,
   AnalyzeUserResponseOutput
 } from '@/lib/types/careerfit-types';
 
@@ -31,7 +36,6 @@ export async function performFullAnalysis(
         console.warn("No resume skills provided for interview script generation. Proceeding with job description only.");
     }
 
-    // Note: generateInterviewScript now returns { questions: string[] }
     const [fitResult, improvementResult, scriptResult] = await Promise.all([
       analyzeResumeFit({ resume: resumeText, jobDescription: jobDescriptionText })
         .catch(e => { throw { source: 'analyzeResumeFit', error: e }; }),
@@ -45,7 +49,7 @@ export async function performFullAnalysis(
       result: {
         resumeFit: fitResult,
         resumeImprovements: improvementResult,
-        interviewScript: scriptResult, // Contains { questions: string[] }
+        interviewScript: scriptResult,
       },
       error: null,
     };
@@ -78,7 +82,7 @@ export async function getTextToSpeech(
 }
 
 export async function getSpeechToText(
-  input: TranscribeSpeechInput
+  input: TranscribeSpeechInput 
 ): Promise<{ transcription: string | null; error: string | null }> {
   try {
     const result: TranscribeSpeechOutput = await transcribeSpeech(input);
