@@ -16,6 +16,7 @@ interface ResultsDisplayProps {
 const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
   const { resumeFit, resumeImprovements, interviewScript } = results;
 
+
   // Helper to format multiline strings into paragraphs
   const formatMultilineText = (text: string | undefined) => {
     if (!text) return <p>No information available.</p>;
@@ -27,9 +28,9 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
   return (
     <div className="space-y-8 mt-10">
       <h2 className="text-3xl font-bold text-center text-primary">Your CareerFit AI Analysis</h2>
-      
+
       <Accordion type="multiple" defaultValue={['resume-fit', 'improvements', 'interview-script-static', 'interactive-interview']} className="w-full space-y-6">
-        
+
         {/* Resume Fit Analysis Card */}
         <AccordionItem value="resume-fit" className="border-none">
           <Card className="shadow-lg overflow-hidden">
@@ -54,7 +55,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
                     </Badge>
                   </div>
                   <Progress value={resumeFit.fitScore} className="w-full h-3 [&>div]:bg-primary" />
-                   <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     {resumeFit.fitScore >= 75 && <><CheckCircle className="inline h-4 w-4 mr-1 text-green-500" />Great fit! Your resume strongly aligns with the job.</>}
                     {resumeFit.fitScore >= 50 && resumeFit.fitScore < 75 && <><AlertTriangle className="inline h-4 w-4 mr-1 text-yellow-500" />Good fit, but there's room for improvement.</>}
                     {resumeFit.fitScore < 50 && <><AlertTriangle className="inline h-4 w-4 mr-1 text-red-500" />Needs improvement to better match the job requirements.</>}
@@ -70,7 +71,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
 
                 <div className="space-y-2">
                   <h4 className="text-lg font-semibold text-foreground">Targeted Suggestions:</h4>
-                   <div className="text-sm text-muted-foreground p-4 bg-secondary/30 rounded-md shadow-inner">
+                  <div className="text-sm text-muted-foreground p-4 bg-secondary/30 rounded-md shadow-inner">
                     {formatMultilineText(resumeFit.suggestions)}
                   </div>
                 </div>
@@ -81,7 +82,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
 
         {/* Resume Improvement Suggestions Card */}
         <AccordionItem value="improvements" className="border-none">
-           <Card className="shadow-lg overflow-hidden">
+          <Card className="shadow-lg overflow-hidden">
             <AccordionTrigger className="w-full hover:no-underline">
               <CardHeader className="flex flex-row items-center justify-between w-full p-6">
                 <div className="flex items-center">
@@ -115,15 +116,15 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
         <AccordionItem value="interview-script-static" className="border-none">
           <Card className="shadow-lg overflow-hidden">
             <AccordionTrigger className="w-full hover:no-underline">
-               <CardHeader className="flex flex-row items-center justify-between w-full p-6">
-                 <div className="flex items-center">
-                    <ClipboardList className="h-8 w-8 mr-3 text-primary" />
-                    <div>
-                      <CardTitle className="text-2xl font-semibold">Generated Interview Questions</CardTitle>
-                      <CardDescription>Review the AI-generated questions for your mock interview.</CardDescription>
-                    </div>
+              <CardHeader className="flex flex-row items-center justify-between w-full p-6">
+                <div className="flex items-center">
+                  <ClipboardList className="h-8 w-8 mr-3 text-primary" />
+                  <div>
+                    <CardTitle className="text-2xl font-semibold">Generated Interview Questions</CardTitle>
+                    <CardDescription>Review the AI-generated questions for your mock interview.</CardDescription>
                   </div>
-               </CardHeader>
+                </div>
+              </CardHeader>
             </AccordionTrigger>
             <AccordionContent>
               <CardContent className="p-6">
@@ -148,28 +149,28 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
         {/* Interactive Mock Interview Card */}
         <AccordionItem value="interactive-interview" className="border-none">
           <Card className="shadow-lg overflow-hidden">
-             <AccordionTrigger className="w-full hover:no-underline">
-               <CardHeader className="flex flex-row items-center justify-between w-full p-6">
-                  <div className="flex items-center">
-                    <MessageSquare className="h-8 w-8 mr-3 text-green-600" />
-                    <div>
-                      <CardTitle className="text-2xl font-semibold">Interactive Mock Interview</CardTitle>
-                      <CardDescription>Practice your responses with AI voice and get feedback.</CardDescription>
-                    </div>
+            <AccordionTrigger className="w-full hover:no-underline">
+              <CardHeader className="flex flex-row items-center justify-between w-full p-6">
+                <div className="flex items-center">
+                  <MessageSquare className="h-8 w-8 mr-3 text-green-600" />
+                  <div>
+                    <CardTitle className="text-2xl font-semibold text-primary">Interactive Mock Interview</CardTitle>
+                    <CardDescription>Practice your responses with AI voice and get feedback.</CardDescription>
                   </div>
-                </CardHeader>
-             </AccordionTrigger>
-             <AccordionContent>
-                <CardContent className="p-0 sm:p-2 md:p-4"> {/* Reduce padding on smaller screens for InteractiveInterview component */}
-                    {interviewScript.questions && interviewScript.questions.length > 0 ? (
-                        <InteractiveInterview questions={interviewScript.questions} />
-                    ) : (
-                        <p className="text-sm text-muted-foreground p-6">
-                            Interactive interview cannot start as no questions were generated.
-                        </p>
-                    )}
-                </CardContent>
-             </AccordionContent>
+                </div>
+              </CardHeader>
+            </AccordionTrigger>
+            <AccordionContent>
+              <CardContent className="p-0 sm:p-2 md:p-4"> {/* Reduce padding on smaller screens for InteractiveInterview component */}
+                {interviewScript.questions && interviewScript.questions.length > 0 ? (
+                  <InteractiveInterview questions={interviewScript.questions} />
+                ) : (
+                  <p className="text-sm text-muted-foreground p-6">
+                    Interactive interview cannot start as no questions were generated.
+                  </p>
+                )}
+              </CardContent>
+            </AccordionContent>
           </Card>
         </AccordionItem>
 

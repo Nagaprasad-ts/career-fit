@@ -36,16 +36,16 @@ export default function CareerFitAiPage() {
     <>
       <main className="container mx-auto px-4 py-8 md:py-12">
         <header className="text-center mb-10 md:mb-16">
-           <div className="inline-flex items-center justify-center mb-4">
-             <Image 
-                src="https://picsum.photos/seed/careerlogo/80/80" // Placeholder logo
-                alt="CareerFit AI Logo" 
-                width={80} 
-                height={80} 
-                className="rounded-xl shadow-md"
-                data-ai-hint="abstract logo"
-             />
-           </div>
+          <div className="inline-flex items-center justify-center mb-4">
+            <Image
+              src="https://picsum.photos/seed/careerlogo/80/80" // Placeholder logo
+              alt="CareerFit AI Logo"
+              width={80}
+              height={80}
+              className="rounded-xl shadow-md"
+              data-ai-hint="abstract logo"
+            />
+          </div>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-primary">
             CareerFit AI
           </h1>
@@ -77,9 +77,9 @@ export default function CareerFitAiPage() {
         )}
       </main>
       <Toaster />
-       <footer className="text-center py-8 mt-12 border-t">
+      <footer className="text-center py-8 mt-12 border-t">
         <p className="text-sm text-muted-foreground">
-          &copy; {new Date().getFullYear()} CareerFit AI. All rights reserved. Powered by GenAI.
+          &copy; {new Date().getFullYear()} CareerFit AI. All rights reserved. Powered by Gemini AI.
         </p>
       </footer>
     </>
