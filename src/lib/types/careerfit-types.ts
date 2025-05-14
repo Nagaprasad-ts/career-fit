@@ -1,8 +1,9 @@
 import type { 
   AnalyzeResumeFitOutput, 
   SuggestResumeImprovementsOutput, 
-  GenerateInterviewScriptOutput as GenkitGenerateInterviewScriptOutput, // Rename to avoid conflict
-  SynthesizeSpeechOutput,
+  GenerateInterviewScriptOutput as GenkitGenerateInterviewScriptOutput,
+  SynthesizeSpeechInput as GenkitSynthesizeSpeechInput, // Import input type
+  SynthesizeSpeechOutput as GenkitSynthesizeSpeechOutput, // Import output type
   TranscribeSpeechOutput,
   AnalyzeUserResponseOutput
 } from '@/ai/flows';
@@ -28,11 +29,6 @@ export interface CareerFitAiError {
 }
 
 // Types for new interactive interview features
-export type { SynthesizeSpeechOutput, TranscribeSpeechOutput, AnalyzeUserResponseOutput };
-
-export interface InteractiveInterviewResponse {
-    audioDataUri?: string; // For TTS of question
-    transcription?: string; // For STT of user answer
-    analysis?: AnalyzeUserResponseOutput; // For feedback on user answer
-    error?: string;
-}
+export type { GenkitSynthesizeSpeechInput as SynthesizeSpeechInput }; // Export input type
+export type { GenkitSynthesizeSpeechOutput as SynthesizeSpeechOutput }; // Export output type
+export type { TranscribeSpeechOutput, AnalyzeUserResponseOutput };
