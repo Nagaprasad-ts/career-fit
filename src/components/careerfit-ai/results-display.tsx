@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -22,6 +23,13 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
     return text.split('\n').map((paragraph, index) => (
       <p key={index} className="mb-2 last:mb-0">{paragraph || <br />}</p>
     ));
+  };
+
+  // Helper to process suggestion strings: converts **text** to <b>text</b>
+  const processSuggestionMarkdownToHtml = (markdownText: string): string => {
+    // Replace **bold** with <b>bold</b>
+    // This specifically targets the Markdown double-asterisk syntax.
+    return markdownText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
   };
 
   return (
@@ -97,11 +105,16 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
               <CardContent className="p-6">
                 {resumeImprovements.improvements && resumeImprovements.improvements.length > 0 ? (
                   <ul className="space-y-3 list-disc list-inside pl-2">
-                    {resumeImprovements.improvements.map((suggestion, index) => (
-                      <li key={index} className="text-sm text-foreground leading-relaxed">
-                        <strong className="text-accent">Suggestion {index + 1}:</strong> {suggestion}
-                      </li>
-                    ))}
+                    {resumeImprovements.improvements.map((suggestionText, index) => {
+                      const processedSuggestionHtml = processSuggestionMarkdownToHtml(suggestionText);
+                      return (
+                        <li key={index} className="text-sm text-foreground leading-relaxed">
+                          <strong className="text-accent">Suggestion {index + 1}:</strong>
+                          {' '}
+                          <span dangerouslySetInnerHTML={{ __html: processedSuggestionHtml }} />
+                        </li>
+                      );
+                    })}
                   </ul>
                 ) : (
                   <p className="text-sm text-muted-foreground">No specific improvement suggestions available at this time. Your resume might be a good fit already, or more details are needed.</p>
