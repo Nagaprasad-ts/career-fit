@@ -17,7 +17,6 @@ interface ResultsDisplayProps {
 const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
   const { resumeFit, resumeImprovements, interviewScript } = results;
 
-
   // Helper to format multiline strings into paragraphs
   const formatMultilineText = (text: string | undefined) => {
     if (!text) return <p>No information available.</p>;
@@ -33,6 +32,24 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
     return markdownText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
   };
 
+  const processNumberedSuggestions = (suggestions: string | undefined) => {
+    if (!suggestions) return <p>No suggestions available.</p>;
+
+    const items = suggestions.split(/\d+\.\s+/).filter(Boolean); // Split by "1. ", "2. ", etc.
+
+    return items.map((item, index) => {
+      const html = processSuggestionMarkdownToHtml(item.trim());
+      return (
+        <p
+          key={index}
+          className="mb-2 last:mb-0"
+          dangerouslySetInnerHTML={{ __html: `<b>${index + 1}.</b> ${html}` }}
+        />
+      );
+    });
+  };
+
+
   return (
     <div className="space-y-8 mt-10">
       <h2 className="text-3xl font-bold text-center text-primary">Your CareerFit AI Analysis</h2>
@@ -43,14 +60,13 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
         <AccordionItem value="resume-fit" className="border-none">
           <Card className="shadow-lg overflow-hidden">
             <AccordionTrigger className="w-full hover:no-underline">
-              <CardHeader className="flex flex-row items-center justify-between w-full p-6">
-                <div className="flex items-center">
-                  <FileScan className="h-8 w-8 mr-3 text-primary" />
-                  <div>
-                    <CardTitle className="text-2xl font-semibold">Resume Fit Analysis</CardTitle>
-                    <CardDescription>How well your resume matches the job description.</CardDescription>
-                  </div>
-                </div>
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-primary flex items-center">
+                  <FileScan className="h-8 w-8 mr-3" /> Resume Fit Analysis
+                </CardTitle>
+                <CardDescription>
+                  How well your resume matches the job description.
+                </CardDescription>
               </CardHeader>
             </AccordionTrigger>
             <AccordionContent>
@@ -80,7 +96,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
                 <div className="space-y-2">
                   <h4 className="text-lg font-semibold text-foreground">Targeted Suggestions:</h4>
                   <div className="text-sm text-muted-foreground p-4 bg-secondary/30 rounded-md shadow-inner">
-                    {formatMultilineText(resumeFit.suggestions)}
+                    {processNumberedSuggestions(resumeFit.suggestions)}
                   </div>
                 </div>
               </CardContent>
@@ -92,14 +108,13 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
         <AccordionItem value="improvements" className="border-none">
           <Card className="shadow-lg overflow-hidden">
             <AccordionTrigger className="w-full hover:no-underline">
-              <CardHeader className="flex flex-row items-center justify-between w-full p-6">
-                <div className="flex items-center">
-                  <Lightbulb className="h-8 w-8 mr-3 text-accent" />
-                  <div>
-                    <CardTitle className="text-2xl font-semibold">Resume Improvement Suggestions</CardTitle>
-                    <CardDescription>Actionable tips to enhance your resume for this role.</CardDescription>
-                  </div>
-                </div>
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-accent flex items-center">
+                  <Lightbulb className="h-8 w-8 mr-3" /> Resume Improvement Suggestions
+                </CardTitle>
+                <CardDescription>
+                  Key actionable tips to effectively enhance your resume for this role.
+                </CardDescription>
               </CardHeader>
             </AccordionTrigger>
             <AccordionContent>
@@ -129,14 +144,13 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
         <AccordionItem value="interview-script-static" className="border-none">
           <Card className="shadow-lg overflow-hidden">
             <AccordionTrigger className="w-full hover:no-underline">
-              <CardHeader className="flex flex-row items-center justify-between w-full p-6">
-                <div className="flex items-center">
-                  <ClipboardList className="h-8 w-8 mr-3 text-primary" />
-                  <div>
-                    <CardTitle className="text-2xl font-semibold">Generated Interview Questions</CardTitle>
-                    <CardDescription>Review the AI-generated questions for your mock interview.</CardDescription>
-                  </div>
-                </div>
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-primary flex items-center">
+                  <ClipboardList className="mr-3 h-7 w-7" /> Generated Interview Questions
+                </CardTitle>
+                <CardDescription>
+                  Review the AI-generated questions for your mock interview.
+                </CardDescription>
               </CardHeader>
             </AccordionTrigger>
             <AccordionContent>
@@ -163,14 +177,13 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
         <AccordionItem value="interactive-interview" className="border-none">
           <Card className="shadow-lg overflow-hidden">
             <AccordionTrigger className="w-full hover:no-underline">
-              <CardHeader className="flex flex-row items-center justify-between w-full p-6">
-                <div className="flex items-center">
-                  <MessageSquare className="h-8 w-8 mr-3 text-green-600" />
-                  <div>
-                    <CardTitle className="text-2xl font-semibold text-primary">Interactive Mock Interview</CardTitle>
-                    <CardDescription>Practice your responses with AI voice and get feedback.</CardDescription>
-                  </div>
-                </div>
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-primary flex items-center">
+                  <MessageSquare className="mr-3 h-7 w-7" /> Interactive Mock Interview
+                </CardTitle>
+                <CardDescription>
+                  Practice your responses. Questions will be read out, and you can record your answers for AI analysis.
+                </CardDescription>
               </CardHeader>
             </AccordionTrigger>
             <AccordionContent>
@@ -188,7 +201,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
         </AccordionItem>
 
       </Accordion>
-    </div>
+    </div >
   );
 };
 
