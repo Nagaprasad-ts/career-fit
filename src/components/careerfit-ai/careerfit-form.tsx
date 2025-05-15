@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { SubmitHandler } from 'react-hook-form';
@@ -22,7 +23,7 @@ const formSchema = z.object({
 });
 
 interface CareerFitFormProps {
-  onAnalysisComplete: (results: FullAnalysisResult) => void;
+  onAnalysisComplete: (results: FullAnalysisResult, formData: CareerFitFormData) => void;
   onAnalysisError: (error: CareerFitAiError) => void;
   setIsLoading: (isLoading: boolean) => void;
   isLoading: boolean;
@@ -30,7 +31,7 @@ interface CareerFitFormProps {
 
 const CareerFitForm: React.FC<CareerFitFormProps> = ({ onAnalysisComplete, onAnalysisError, setIsLoading, isLoading }) => {
   const [serverError, setServerError] = useState<string | null>(null);
-  
+
   const {
     register,
     handleSubmit,
@@ -59,7 +60,7 @@ const CareerFitForm: React.FC<CareerFitFormProps> = ({ onAnalysisComplete, onAna
       onAnalysisError(response.error);
       setServerError(response.error.message);
     } else if (response.result) {
-      onAnalysisComplete(response.result);
+      onAnalysisComplete(response.result, data); // Pass original form data as well
     }
   };
 
@@ -108,7 +109,7 @@ const CareerFitForm: React.FC<CareerFitFormProps> = ({ onAnalysisComplete, onAna
               rows={3}
             />
             {errors.resumeSkills && <p className="text-sm text-destructive font-medium">{errors.resumeSkills.message}</p>}
-             <p className="text-xs text-muted-foreground">These skills help generate a more relevant mock interview script.</p>
+             <p className="text-xs text-muted-foreground">These skills help generate a more relevant mock interview script and tailored resume.</p>
           </div>
         </CardContent>
         <CardFooter className="border-t px-6 py-4">

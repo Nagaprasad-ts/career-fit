@@ -1,21 +1,40 @@
 
 'use client';
 
-import React from 'react';
-import type { FullAnalysisResult } from '@/lib/types/careerfit-types';
+import React, { useState } from 'react';
+import type { FullAnalysisResult, CareerFitAiError } from '@/lib/types/careerfit-types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { FileScan, Lightbulb, ClipboardList, CheckCircle, AlertTriangle, MessageSquare } from 'lucide-react';
-import InteractiveInterview from './interactive-interview'; // Import the new component
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { FileScan, Lightbulb, ClipboardList, CheckCircle, AlertTriangle, MessageSquare, FileText, Loader2, Wand2, Info } from 'lucide-react';
+import InteractiveInterview from './interactive-interview';
+import { generateTailoredResumeAction } from '@/lib/actions/careerfit-actions';
+import { useToast } from '@/hooks/use-toast';
+
 
 interface ResultsDisplayProps {
   results: FullAnalysisResult;
+  originalResumeText: string;
+  originalJobDescriptionText: string;
+  originalSkillsString: string; // Comma-separated string
 }
 
-const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
+const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
+  results,
+  originalResumeText,
+  originalJobDescriptionText,
+  originalSkillsString,
+}) => {
   const { resumeFit, resumeImprovements, interviewScript } = results;
+  const { toast } = useToast();
+
+  const [generatedResumeText, setGeneratedResumeText] = useState<string | null>(null);
+  const [isGeneratingResume, setIsGeneratingResume] = useState(false);
+  const [resumeGenerationError, setResumeGenerationError] = useState<string | null>(null);
 
   // Helper to format multiline strings into paragraphs
   const formatMultilineText = (text: string | undefined) => {
@@ -27,17 +46,56 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
 
   // Helper to process suggestion strings: converts **text** to <b>text</b>
   const processSuggestionMarkdownToHtml = (markdownText: string): string => {
-    // Replace **bold** with <b>bold</b>
-    // This specifically targets the Markdown double-asterisk syntax.
     return markdownText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
   };
+
+  const handleGenerateTailoredResume = async () => {
+    setIsGeneratingResume(true);
+    setResumeGenerationError(null);
+    setGeneratedResumeText(null);
+
+    const skillsArray = originalSkillsString ? originalSkillsString.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0) : [];
+
+    try {
+      const response = await generateTailoredResumeAction({
+        originalResume: originalResumeText,
+        jobDescription: originalJobDescriptionText,
+        keySkills: skillsArray,
+      });
+
+      if (response.error) {
+        throw new Error(response.error.message);
+      }
+      if (response.tailoredResumeText) {
+        setGeneratedResumeText(response.tailoredResumeText);
+        toast({
+          title: "Tailored Resume Generated!",
+          description: "Your new resume is ready.",
+          variant: "default",
+        });
+      } else {
+        throw new Error("AI did not return a resume. Please try again.");
+      }
+    } catch (error: any) {
+      console.error("Resume Generation Error:", error);
+      setResumeGenerationError(error.message || "An unknown error occurred while generating the resume.");
+      toast({
+        title: "Resume Generation Failed",
+        description: error.message || "An unknown error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingResume(false);
+    }
+  };
+
 
   return (
     <div className="space-y-8 mt-10">
       <h2 className="text-3xl font-bold text-center text-primary">Your CareerFit AI Analysis</h2>
-      
-      <Accordion type="multiple" defaultValue={['resume-fit', 'improvements', 'interview-script-static', 'interactive-interview']} className="w-full space-y-6">
-        
+
+      <Accordion type="multiple" defaultValue={['resume-fit', 'improvements', 'interview-script-static', 'interactive-interview', 'tailored-resume']} className="w-full space-y-6">
+
         {/* Resume Fit Analysis Card */}
         <AccordionItem value="resume-fit" className="border-none">
           <Card className="shadow-lg overflow-hidden">
@@ -173,7 +231,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
                 </CardHeader>
              </AccordionTrigger>
              <AccordionContent>
-                <CardContent className="p-0 sm:p-2 md:p-4"> {/* Reduce padding on smaller screens for InteractiveInterview component */}
+                <CardContent className="p-0 sm:p-2 md:p-4">
                     {interviewScript.questions && interviewScript.questions.length > 0 ? (
                         <InteractiveInterview questions={interviewScript.questions} />
                     ) : (
@@ -183,6 +241,76 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
                     )}
                 </CardContent>
              </AccordionContent>
+          </Card>
+        </AccordionItem>
+
+        {/* Tailored Resume Generator Card */}
+        <AccordionItem value="tailored-resume" className="border-none">
+          <Card className="shadow-lg overflow-hidden">
+            <AccordionTrigger className="w-full hover:no-underline">
+              <CardHeader className="flex flex-row items-center justify-between w-full p-6">
+                <div className="flex items-center">
+                  <FileText className="h-8 w-8 mr-3 text-purple-600" />
+                  <div>
+                    <CardTitle className="text-2xl font-semibold">Tailored Resume Generator</CardTitle>
+                    <CardDescription>Generate an AI-optimized resume based on your inputs.</CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </AccordionTrigger>
+            <AccordionContent>
+              <CardContent className="p-6 space-y-4">
+                {resumeGenerationError && (
+                  <Alert variant="destructive">
+                    <Info className="h-4 w-4" />
+                    <AlertTitle>Resume Generation Error</AlertTitle>
+                    <AlertDescription>{resumeGenerationError}</AlertDescription>
+                  </Alert>
+                )}
+                <Button
+                  onClick={handleGenerateTailoredResume}
+                  disabled={isGeneratingResume}
+                  className="w-full sm:w-auto text-lg px-8 py-6 bg-purple-600 hover:bg-purple-700 text-white"
+                >
+                  {isGeneratingResume ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Generating Resume...
+                    </>
+                  ) : (
+                    <>
+                      <Wand2 className="mr-2 h-5 w-5" />
+                      Generate Tailored Resume
+                    </>
+                  )}
+                </Button>
+                {isGeneratingResume && (
+                  <p className="text-sm text-center text-purple-600 animate-pulse">
+                    AI is crafting your resume, please wait...
+                  </p>
+                )}
+                {generatedResumeText && !isGeneratingResume && (
+                  <div className="space-y-3 mt-4">
+                    <h4 className="text-lg font-semibold text-foreground">Your Generated Tailored Resume:</h4>
+                    <Textarea
+                      value={generatedResumeText}
+                      readOnly
+                      rows={20}
+                      className="bg-muted/30 border-purple-300 focus:border-purple-500 text-sm p-4 rounded-md shadow-inner"
+                      placeholder="Your tailored resume will appear here."
+                    />
+                     <Button
+                        onClick={() => navigator.clipboard.writeText(generatedResumeText)}
+                        variant="outline"
+                        size="sm"
+                        className="mt-2"
+                      >
+                        Copy Resume to Clipboard
+                      </Button>
+                  </div>
+                )}
+              </CardContent>
+            </AccordionContent>
           </Card>
         </AccordionItem>
 

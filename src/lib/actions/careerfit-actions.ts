@@ -1,24 +1,27 @@
 
 'use server';
 
-import { 
-  analyzeResumeFit, 
-  suggestResumeImprovements, 
+import {
+  analyzeResumeFit,
+  suggestResumeImprovements,
   generateInterviewScript,
   analyzeUserResponse,
   synthesizeSpeech,
-  transcribeSpeech 
+  transcribeSpeech,
+  generateTailoredResume // Added import
 } from '@/ai/flows';
-import type { 
-  CareerFitFormData, 
-  FullAnalysisResult, 
+import type {
+  CareerFitFormData,
+  FullAnalysisResult,
   CareerFitAiError,
   SynthesizeSpeechInput,
   SynthesizeSpeechOutput,
   TranscribeSpeechInput,
   TranscribeSpeechOutput,
   AnalyzeUserResponseInput,
-  AnalyzeUserResponseOutput
+  AnalyzeUserResponseOutput,
+  GenerateTailoredResumeInput, // Added import
+  GenerateTailoredResumeOutput // Added import
 } from '@/lib/types/careerfit-types';
 
 export async function performFullAnalysis(
@@ -30,7 +33,7 @@ export async function performFullAnalysis(
     if (!resumeText || !jobDescriptionText) {
       return { result: null, error: { message: 'Resume and Job Description text cannot be empty.' } };
     }
-    
+
     const skillsArray = resumeSkills ? resumeSkills.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0) : [];
     if (skillsArray.length === 0) {
         console.warn("No resume skills provided for interview script generation. Proceeding with job description only.");
@@ -64,7 +67,7 @@ export async function performFullAnalysis(
     } else if (error && error.message) {
       errorMessage = error.message;
     }
-    
+
     return { result: null, error: { message: errorMessage, source: errorSource } };
   }
 }
@@ -82,7 +85,7 @@ export async function getTextToSpeech(
 }
 
 export async function getSpeechToText(
-  input: TranscribeSpeechInput 
+  input: TranscribeSpeechInput
 ): Promise<{ transcription: string | null; error: string | null }> {
   try {
     const result: TranscribeSpeechOutput = await transcribeSpeech(input);
@@ -102,5 +105,18 @@ export async function analyzeSpokenResponse(
   } catch (e: any) {
     console.error('Error in analyzeSpokenResponse:', e);
     return { analysis: null, error: e.message || 'Failed to analyze response.' };
+  }
+}
+
+export async function generateTailoredResumeAction(
+  input: GenerateTailoredResumeInput
+): Promise<{ tailoredResumeText: string | null; error: CareerFitAiError | null }> {
+  try {
+    const result: GenerateTailoredResumeOutput = await generateTailoredResume(input);
+    return { tailoredResumeText: result.tailoredResumeText, error: null };
+  } catch (e: any) {
+    console.error('Error in generateTailoredResumeAction:', e);
+    const errorMessage = e.message || 'Failed to generate tailored resume.';
+    return { tailoredResumeText: null, error: { message: errorMessage, source: 'generateTailoredResume' } };
   }
 }
