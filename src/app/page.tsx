@@ -42,7 +42,7 @@ export default function CareerFitAiPage() {
         <header className="text-center mb-10 md:mb-16">
           <div className="inline-flex items-center justify-center mb-4">
             <Image
-              src="https://picsum.photos/seed/careerlogo/80/80" // Placeholder logo
+              src="https://placehold.co/80x80.png"
               alt="CareerFit AI Logo"
               width={80}
               height={80}
@@ -50,16 +50,6 @@ export default function CareerFitAiPage() {
               data-ai-hint="abstract logo"
             />
           </div>
-           <div className="inline-flex items-center justify-center mb-4">
-             <Image
-                src="https://placehold.co/80x80.png"
-                alt="CareerFit AI Logo"
-                width={80}
-                height={80}
-                className="rounded-xl shadow-md"
-                data-ai-hint="abstract logo"
-             />
-           </div>
           <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight text-primary">
             CareerFit AI
           </h1>
