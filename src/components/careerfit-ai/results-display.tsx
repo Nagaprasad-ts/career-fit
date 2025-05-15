@@ -1,40 +1,21 @@
 
 'use client';
 
-import React, { useState } from 'react';
-import type { FullAnalysisResult, CareerFitAiError } from '@/lib/types/careerfit-types';
+import React from 'react';
+import type { FullAnalysisResult } from '@/lib/types/careerfit-types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { FileScan, Lightbulb, ClipboardList, CheckCircle, AlertTriangle, MessageSquare, FileText, Loader2, Wand2, Info } from 'lucide-react';
-import InteractiveInterview from './interactive-interview';
-import { generateTailoredResumeAction } from '@/lib/actions/careerfit-actions';
-import { useToast } from '@/hooks/use-toast';
-
+import { FileScan, Lightbulb, ClipboardList, CheckCircle, AlertTriangle, MessageSquare } from 'lucide-react';
+import InteractiveInterview from './interactive-interview'; // Import the new component
 
 interface ResultsDisplayProps {
   results: FullAnalysisResult;
-  originalResumeText: string;
-  originalJobDescriptionText: string;
-  originalSkillsString: string; // Comma-separated string
 }
 
-const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
-  results,
-  originalResumeText,
-  originalJobDescriptionText,
-  originalSkillsString,
-}) => {
+const ResultsDisplay: React.FC<ResultsDisplayProps> = ({ results }) => {
   const { resumeFit, resumeImprovements, interviewScript } = results;
-  const { toast } = useToast();
-
-  const [generatedResumeText, setGeneratedResumeText] = useState<string | null>(null);
-  const [isGeneratingResume, setIsGeneratingResume] = useState(false);
-  const [resumeGenerationError, setResumeGenerationError] = useState<string | null>(null);
 
   // Helper to format multiline strings into paragraphs
   const formatMultilineText = (text: string | undefined) => {
@@ -46,6 +27,8 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
 
   // Helper to process suggestion strings: converts **text** to <b>text</b>
   const processSuggestionMarkdownToHtml = (markdownText: string): string => {
+    // Replace **bold** with <b>bold</b>
+    // This specifically targets the Markdown double-asterisk syntax.
     return markdownText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
   };
 
@@ -70,9 +53,9 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
   return (
     <div className="space-y-8 mt-10">
       <h2 className="text-3xl font-bold text-center text-primary">Your CareerFit AI Analysis</h2>
-      
+
       <Accordion type="multiple" defaultValue={['resume-fit', 'improvements', 'interview-script-static', 'interactive-interview']} className="w-full space-y-6">
-        
+
         {/* Resume Fit Analysis Card */}
         <AccordionItem value="resume-fit" className="border-none">
           <Card className="shadow-lg overflow-hidden">
@@ -193,28 +176,27 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
         {/* Interactive Mock Interview Card */}
         <AccordionItem value="interactive-interview" className="border-none">
           <Card className="shadow-lg overflow-hidden">
-             <AccordionTrigger className="w-full hover:no-underline">
-               <CardHeader className="flex flex-row items-center justify-between w-full p-6">
-                  <div className="flex items-center">
-                    <MessageSquare className="h-8 w-8 mr-3 text-green-600" />
-                    <div>
-                      <CardTitle className="text-2xl font-semibold">Interactive Mock Interview</CardTitle>
-                      <CardDescription>Practice your responses with AI voice and get feedback.</CardDescription>
-                    </div>
-                  </div>
-                </CardHeader>
-             </AccordionTrigger>
-             <AccordionContent>
-                <CardContent className="p-0 sm:p-2 md:p-4"> {/* Reduce padding on smaller screens for InteractiveInterview component */}
-                    {interviewScript.questions && interviewScript.questions.length > 0 ? (
-                        <InteractiveInterview questions={interviewScript.questions} />
-                    ) : (
-                        <p className="text-sm text-muted-foreground p-6">
-                            Interactive interview cannot start as no questions were generated.
-                        </p>
-                    )}
-                </CardContent>
-             </AccordionContent>
+            <AccordionTrigger className="w-full hover:no-underline">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-primary flex items-center">
+                  <MessageSquare className="mr-3 h-7 w-7" /> Interactive Mock Interview
+                </CardTitle>
+                <CardDescription>
+                  Practice your responses. Questions will be read out, and you can record your answers for AI analysis.
+                </CardDescription>
+              </CardHeader>
+            </AccordionTrigger>
+            <AccordionContent>
+              <CardContent className="p-0 sm:p-2 md:p-4"> {/* Reduce padding on smaller screens for InteractiveInterview component */}
+                {interviewScript.questions && interviewScript.questions.length > 0 ? (
+                  <InteractiveInterview questions={interviewScript.questions} />
+                ) : (
+                  <p className="text-sm text-muted-foreground p-6">
+                    Interactive interview cannot start as no questions were generated.
+                  </p>
+                )}
+              </CardContent>
+            </AccordionContent>
           </Card>
         </AccordionItem>
 
