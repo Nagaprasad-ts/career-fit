@@ -49,65 +49,41 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
     return markdownText.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>');
   };
 
-  const handleGenerateTailoredResume = async () => {
-    setIsGeneratingResume(true);
-    setResumeGenerationError(null);
-    setGeneratedResumeText(null);
+  const processNumberedSuggestions = (suggestions: string | undefined) => {
+    if (!suggestions) return <p>No suggestions available.</p>;
 
-    const skillsArray = originalSkillsString ? originalSkillsString.split(',').map(skill => skill.trim()).filter(skill => skill.length > 0) : [];
+    const items = suggestions.split(/\d+\.\s+/).filter(Boolean); // Split by "1. ", "2. ", etc.
 
-    try {
-      const response = await generateTailoredResumeAction({
-        originalResume: originalResumeText,
-        jobDescription: originalJobDescriptionText,
-        keySkills: skillsArray,
-      });
-
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-      if (response.tailoredResumeText) {
-        setGeneratedResumeText(response.tailoredResumeText);
-        toast({
-          title: "Tailored Resume Generated!",
-          description: "Your new resume is ready.",
-          variant: "default",
-        });
-      } else {
-        throw new Error("AI did not return a resume. Please try again.");
-      }
-    } catch (error: any) {
-      console.error("Resume Generation Error:", error);
-      setResumeGenerationError(error.message || "An unknown error occurred while generating the resume.");
-      toast({
-        title: "Resume Generation Failed",
-        description: error.message || "An unknown error occurred. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGeneratingResume(false);
-    }
+    return items.map((item, index) => {
+      const html = processSuggestionMarkdownToHtml(item.trim());
+      return (
+        <p
+          key={index}
+          className="mb-2 last:mb-0"
+          dangerouslySetInnerHTML={{ __html: `<b>${index + 1}.</b> ${html}` }}
+        />
+      );
+    });
   };
 
 
   return (
     <div className="space-y-8 mt-10">
       <h2 className="text-3xl font-bold text-center text-primary">Your CareerFit AI Analysis</h2>
-
-      <Accordion type="multiple" defaultValue={['resume-fit', 'improvements', 'interview-script-static', 'interactive-interview', 'tailored-resume']} className="w-full space-y-6">
-
+      
+      <Accordion type="multiple" defaultValue={['resume-fit', 'improvements', 'interview-script-static', 'interactive-interview']} className="w-full space-y-6">
+        
         {/* Resume Fit Analysis Card */}
         <AccordionItem value="resume-fit" className="border-none">
           <Card className="shadow-lg overflow-hidden">
             <AccordionTrigger className="w-full hover:no-underline">
-              <CardHeader className="flex flex-row items-center justify-between w-full p-6">
-                <div className="flex items-center">
-                  <FileScan className="h-8 w-8 mr-3 text-primary" />
-                  <div>
-                    <CardTitle className="text-2xl font-semibold">Resume Fit Analysis</CardTitle>
-                    <CardDescription>How well your resume matches the job description.</CardDescription>
-                  </div>
-                </div>
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-primary flex items-center">
+                  <FileScan className="h-8 w-8 mr-3" /> Resume Fit Analysis
+                </CardTitle>
+                <CardDescription>
+                  How well your resume matches the job description.
+                </CardDescription>
               </CardHeader>
             </AccordionTrigger>
             <AccordionContent>
@@ -120,7 +96,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
                     </Badge>
                   </div>
                   <Progress value={resumeFit.fitScore} className="w-full h-3 [&>div]:bg-primary" />
-                   <p className="text-sm text-muted-foreground mt-1">
+                  <p className="text-sm text-muted-foreground mt-1">
                     {resumeFit.fitScore >= 75 && <><CheckCircle className="inline h-4 w-4 mr-1 text-green-500" />Great fit! Your resume strongly aligns with the job.</>}
                     {resumeFit.fitScore >= 50 && resumeFit.fitScore < 75 && <><AlertTriangle className="inline h-4 w-4 mr-1 text-yellow-500" />Good fit, but there's room for improvement.</>}
                     {resumeFit.fitScore < 50 && <><AlertTriangle className="inline h-4 w-4 mr-1 text-red-500" />Needs improvement to better match the job requirements.</>}
@@ -136,8 +112,8 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
 
                 <div className="space-y-2">
                   <h4 className="text-lg font-semibold text-foreground">Targeted Suggestions:</h4>
-                   <div className="text-sm text-muted-foreground p-4 bg-secondary/30 rounded-md shadow-inner">
-                    {formatMultilineText(resumeFit.suggestions)}
+                  <div className="text-sm text-muted-foreground p-4 bg-secondary/30 rounded-md shadow-inner">
+                    {processNumberedSuggestions(resumeFit.suggestions)}
                   </div>
                 </div>
               </CardContent>
@@ -147,16 +123,15 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
 
         {/* Resume Improvement Suggestions Card */}
         <AccordionItem value="improvements" className="border-none">
-           <Card className="shadow-lg overflow-hidden">
+          <Card className="shadow-lg overflow-hidden">
             <AccordionTrigger className="w-full hover:no-underline">
-              <CardHeader className="flex flex-row items-center justify-between w-full p-6">
-                <div className="flex items-center">
-                  <Lightbulb className="h-8 w-8 mr-3 text-accent" />
-                  <div>
-                    <CardTitle className="text-2xl font-semibold">Resume Improvement Suggestions</CardTitle>
-                    <CardDescription>Actionable tips to enhance your resume for this role.</CardDescription>
-                  </div>
-                </div>
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-accent flex items-center">
+                  <Lightbulb className="h-8 w-8 mr-3" /> Resume Improvement Suggestions
+                </CardTitle>
+                <CardDescription>
+                  Key actionable tips to effectively enhance your resume for this role.
+                </CardDescription>
               </CardHeader>
             </AccordionTrigger>
             <AccordionContent>
@@ -186,15 +161,14 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
         <AccordionItem value="interview-script-static" className="border-none">
           <Card className="shadow-lg overflow-hidden">
             <AccordionTrigger className="w-full hover:no-underline">
-               <CardHeader className="flex flex-row items-center justify-between w-full p-6">
-                 <div className="flex items-center">
-                    <ClipboardList className="h-8 w-8 mr-3 text-primary" />
-                    <div>
-                      <CardTitle className="text-2xl font-semibold">Generated Interview Questions</CardTitle>
-                      <CardDescription>Review the AI-generated questions for your mock interview.</CardDescription>
-                    </div>
-                  </div>
-               </CardHeader>
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-primary flex items-center">
+                  <ClipboardList className="mr-3 h-7 w-7" /> Generated Interview Questions
+                </CardTitle>
+                <CardDescription>
+                  Review the AI-generated questions for your mock interview.
+                </CardDescription>
+              </CardHeader>
             </AccordionTrigger>
             <AccordionContent>
               <CardContent className="p-6">
@@ -231,7 +205,7 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
                 </CardHeader>
              </AccordionTrigger>
              <AccordionContent>
-                <CardContent className="p-0 sm:p-2 md:p-4">
+                <CardContent className="p-0 sm:p-2 md:p-4"> {/* Reduce padding on smaller screens for InteractiveInterview component */}
                     {interviewScript.questions && interviewScript.questions.length > 0 ? (
                         <InteractiveInterview questions={interviewScript.questions} />
                     ) : (
@@ -244,78 +218,8 @@ const ResultsDisplay: React.FC<ResultsDisplayProps> = ({
           </Card>
         </AccordionItem>
 
-        {/* Tailored Resume Generator Card */}
-        <AccordionItem value="tailored-resume" className="border-none">
-          <Card className="shadow-lg overflow-hidden">
-            <AccordionTrigger className="w-full hover:no-underline">
-              <CardHeader className="flex flex-row items-center justify-between w-full p-6">
-                <div className="flex items-center">
-                  <FileText className="h-8 w-8 mr-3 text-purple-600" />
-                  <div>
-                    <CardTitle className="text-2xl font-semibold">Tailored Resume Generator</CardTitle>
-                    <CardDescription>Generate an AI-optimized resume based on your inputs.</CardDescription>
-                  </div>
-                </div>
-              </CardHeader>
-            </AccordionTrigger>
-            <AccordionContent>
-              <CardContent className="p-6 space-y-4">
-                {resumeGenerationError && (
-                  <Alert variant="destructive">
-                    <Info className="h-4 w-4" />
-                    <AlertTitle>Resume Generation Error</AlertTitle>
-                    <AlertDescription>{resumeGenerationError}</AlertDescription>
-                  </Alert>
-                )}
-                <Button
-                  onClick={handleGenerateTailoredResume}
-                  disabled={isGeneratingResume}
-                  className="w-full sm:w-auto text-lg px-8 py-6 bg-purple-600 hover:bg-purple-700 text-white"
-                >
-                  {isGeneratingResume ? (
-                    <>
-                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                      Generating Resume...
-                    </>
-                  ) : (
-                    <>
-                      <Wand2 className="mr-2 h-5 w-5" />
-                      Generate Tailored Resume
-                    </>
-                  )}
-                </Button>
-                {isGeneratingResume && (
-                  <p className="text-sm text-center text-purple-600 animate-pulse">
-                    AI is crafting your resume, please wait...
-                  </p>
-                )}
-                {generatedResumeText && !isGeneratingResume && (
-                  <div className="space-y-3 mt-4">
-                    <h4 className="text-lg font-semibold text-foreground">Your Generated Tailored Resume:</h4>
-                    <Textarea
-                      value={generatedResumeText}
-                      readOnly
-                      rows={20}
-                      className="bg-muted/30 border-purple-300 focus:border-purple-500 text-sm p-4 rounded-md shadow-inner"
-                      placeholder="Your tailored resume will appear here."
-                    />
-                     <Button
-                        onClick={() => navigator.clipboard.writeText(generatedResumeText)}
-                        variant="outline"
-                        size="sm"
-                        className="mt-2"
-                      >
-                        Copy Resume to Clipboard
-                      </Button>
-                  </div>
-                )}
-              </CardContent>
-            </AccordionContent>
-          </Card>
-        </AccordionItem>
-
       </Accordion>
-    </div>
+    </div >
   );
 };
 

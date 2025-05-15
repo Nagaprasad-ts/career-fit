@@ -39,7 +39,7 @@ const InteractiveInterview: React.FC<InteractiveInterviewProps> = ({ questions }
       }
     };
   }, []);
-  
+
   const currentQuestion = questions[currentQuestionIndex];
 
   const handlePlayQuestion = async () => {
@@ -120,19 +120,11 @@ const InteractiveInterview: React.FC<InteractiveInterviewProps> = ({ questions }
       toast({ title: 'Interview Complete', description: 'You have answered all questions.' });
     }
   };
-  
+
   const progressPercentage = ((currentQuestionIndex + 1) / questions.length) * 100;
 
   return (
-    <Card className="w-full shadow-xl mt-8">
-      <CardHeader>
-        <CardTitle className="text-2xl font-bold text-primary flex items-center">
-          <MessageSquare className="mr-3 h-7 w-7" /> Interactive Mock Interview
-        </CardTitle>
-        <CardDescription>
-          Practice your responses. Questions will be read out, and you can record your answers for AI analysis.
-        </CardDescription>
-      </CardHeader>
+    <Card className="w-full shadow-xl">
       <CardContent className="space-y-6 p-6">
         {error && (
           <Alert variant="destructive">
@@ -143,36 +135,36 @@ const InteractiveInterview: React.FC<InteractiveInterviewProps> = ({ questions }
         )}
 
         <div className="space-y-2">
-            <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold">Question {currentQuestionIndex + 1} of {questions.length}</h3>
-                <Button 
-                    onClick={handlePlayQuestion} 
-                    variant="outline" 
-                    size="sm"
-                    disabled={isLoading === 'tts' || isQuestionPlaying}
-                >
-                    {isLoading === 'tts' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Volume2 className="h-4 w-4 mr-2" />}
-                    {isQuestionPlaying ? 'Playing...' : 'Read Question'}
-                </Button>
-            </div>
-            <Progress value={progressPercentage} className="w-full h-2 [&>div]:bg-primary" />
-            <p className="text-md text-foreground p-4 bg-secondary/30 rounded-md shadow-inner min-h-[60px]">
-                {currentQuestion || "Loading question..."}
-            </p>
+          <div className="flex justify-between items-center">
+            <h3 className="text-lg font-semibold">Question {currentQuestionIndex + 1} of {questions.length}</h3>
+            <Button
+              onClick={handlePlayQuestion}
+              variant="outline"
+              size="sm"
+              disabled={isLoading === 'tts' || isQuestionPlaying}
+            >
+              {isLoading === 'tts' ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Volume2 className="h-4 w-4 mr-2" />}
+              {isQuestionPlaying ? 'Playing...' : 'Read Question'}
+            </Button>
+          </div>
+          <Progress value={progressPercentage} className="w-full h-2 [&>div]:bg-primary" />
+          <p className="text-md text-foreground p-4 bg-secondary/30 rounded-md shadow-inner min-h-[60px]">
+            {currentQuestion || "Loading question..."}
+          </p>
         </div>
-        
+
         <div className="space-y-4">
           {!isRecording ? (
-            <Button 
-              onClick={handleStartRecording} 
+            <Button
+              onClick={handleStartRecording}
               className="w-full sm:w-auto text-lg px-6 py-5 bg-green-600 hover:bg-green-700 text-white"
               disabled={isLoading !== null}
             >
               <Mic className="mr-2 h-5 w-5" /> Start Recording Answer
             </Button>
           ) : (
-            <Button 
-              onClick={handleStopRecordingAndAnalyze} 
+            <Button
+              onClick={handleStopRecordingAndAnalyze}
               className="w-full sm:w-auto text-lg px-6 py-5 bg-red-600 hover:bg-red-700 text-white"
               disabled={isLoading !== null}
             >
@@ -191,10 +183,10 @@ const InteractiveInterview: React.FC<InteractiveInterviewProps> = ({ questions }
         {userTranscript && (
           <div className="space-y-2">
             <h4 className="text-md font-semibold">Your Transcribed Response:</h4>
-            <Textarea value={userTranscript} readOnly rows={4} className="bg-muted/50"/>
+            <Textarea value={userTranscript} readOnly rows={4} className="bg-muted/50" />
           </div>
         )}
-        
+
         {isLoading === 'analysis' && <p className="text-sm text-center text-primary animate-pulse">Analyzing your response...</p>}
         {responseAnalysis && (
           <Card className="bg-background border-primary/30">
@@ -223,12 +215,12 @@ const InteractiveInterview: React.FC<InteractiveInterviewProps> = ({ questions }
         )}
       </CardContent>
       <CardFooter className="border-t px-6 py-4">
-        <Button 
-            onClick={handleNextQuestion} 
-            disabled={isLoading !== null || currentQuestionIndex >= questions.length - 1 || isRecording}
-            className="w-full sm:w-auto"
+        <Button
+          onClick={handleNextQuestion}
+          disabled={isLoading !== null || currentQuestionIndex >= questions.length - 1 || isRecording}
+          className="w-full sm:w-auto"
         >
-            <SkipForward className="mr-2 h-5 w-5" /> Next Question
+          <SkipForward className="mr-2 h-5 w-5" /> Next Question
         </Button>
       </CardFooter>
     </Card>
